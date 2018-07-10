@@ -43,7 +43,7 @@ def addTweet(self,request,format=None):
                     hashtags.append(hashtag['text'])
                 source= {
                     "created_at": tweet['created_at'],
-                    "text": "hello",
+                    "text": tweet['text'],
                     "userId": tweet['user']['id'],
                     "userName": tweet['user']['name'],
                     "hashTags":hashtags
@@ -71,37 +71,37 @@ def searchUser(self, request, format=None):
         return "Bad_Request"
 
 def searchText(self,request,format=None):
-    # try:
-    sendData = []
-    searchValue='.*'+str(request["search"])+'.*'
-    print searchValue
-    es = Elasticsearch()
-    es.indices.refresh(index=request['model'])
-    res = es.search(index=request['model'], body={"query":
-                                                      {"bool":
-                                                           {"should":
-                                                                [
-                                                                    {"regexp": {"text": searchValue}},
-                                                                     {"regexp": {"hashTags": searchValue}}
-                                                                 ]
-                                                            }
-                                                       }
-                                                  }
-                    )
-    print (res['hits']['total'])
+    try:
+        sendData = []
+        searchValue='.*'+str(request["search"])+'.*'
+        print searchValue
+        es = Elasticsearch()
+        es.indices.refresh(index=request['model'])
+        res = es.search(index=request['model'], body={"query":
+                                                          {"bool":
+                                                               {"should":
+                                                                    [
+                                                                        {"regexp": {"text": searchValue}},
+                                                                         {"regexp": {"hashTags": searchValue}}
+                                                                     ]
+                                                                }
+                                                           }
+                                                      }
+                        )
+        print (res['hits']['total'])
 
-    sendData.append({"TotalMatches": res['hits']['total']})
-    totalCount=int(res['hits']['total'])
-    for i in range(0,totalCount):
-        source = {
-            "id":res['hits']['hits'][i]['_id'],
-            "text": res['hits']['hits'][i]['_source']['text'],
-            "hashTags": res['hits']['hits'][1]['_source']['hashTags']
-        }
-        sendData.append(source)
-    return totalCount
-    # except Exception as e:
-    #     return "Bad_Request"
+        sendData.append({"TotalMatches": res['hits']['total']})
+        totalCount=int(res['hits']['total'])
+        # for i in range(0,totalCount):
+        #     source = {
+        #         "id":res['hits']['hits'][i]['_id'],
+        #         "text": res['hits']['hits'][i]['_source']['text'],
+        #         "hashTags": res['hits']['hits'][1]['_source']['hashTags']
+        #     }
+        #     sendData.append(source)
+        return sendData
+    except Exception as e:
+        return "Bad_Request"
 
 
 def searchWithTime(self,request,format=None):
